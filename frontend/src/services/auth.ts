@@ -43,34 +43,8 @@ export const login = async (username: string, password: string): Promise<AuthRes
   return data;
 };
 
-export const updateUserHobbies = async (hobbies: string[], replace = false): Promise<any> => {
-  try {
-    const data = { hobbies, replace };
-    const res = await fetch(`${API_BASE_URL}/auth/update-hobbies`, {
-      method: 'POST',
-      headers: getAuthHeader(),
-      body: JSON.stringify(data)
-    });
-    return res.json();
-  } catch (error) {
-    console.error('Error updating hobbies:', error);
-    return { status: 'error', message: 'Failed to update hobbies' };
-  }
-};
-
-export const updateUserGender = async (gender: string): Promise<any> => {
-  try {
-    const res = await fetch(`${API_BASE_URL}/auth/update-gender`, {
-      method: 'POST',
-      headers: getAuthHeader(),
-      body: JSON.stringify({ gender })
-    });
-    return res.json();
-  } catch (error) {
-    console.error('Error updating gender:', error);
-    return { status: 'error', message: 'Failed to update gender' };
-  }
-};
+ 
+ 
 
 export const changePassword = async (currentPassword: string, newPassword: string): Promise<any> => {
   try {

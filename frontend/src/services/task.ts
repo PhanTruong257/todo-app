@@ -4,7 +4,20 @@ import { apiGet, apiPost, apiDelete } from './apiClient';
 // Lấy danh sách tasks của user hiện tại
 export const fetchTasks = async (): Promise<Task[]> => {
   try {
-    return await apiGet('/tasks');
+     
+    const response = await apiGet('/tasks');
+    console.log('Tasks fetched successfully:', response);
+
+
+      const mappedTasks: Task[] = response.map((task: any) => ({
+        id: task._id,
+        title: task.title,
+       
+      }));
+
+          console.log('Mapped tasks:', mappedTasks);
+
+return mappedTasks;
   } catch (error) {
     console.error('Error fetching tasks:', error);
     return [];
