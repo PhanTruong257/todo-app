@@ -97,6 +97,23 @@ class AuthController {
       });
     }
   };
+
+   googleLogin = async (req, res, next) => {
+    try {
+      console.log(`[P]::GoogleLogin::`, req.body);
+      const { credential } = req.body;
+      const result = await AuthService.googleLogin(credential);
+      console.log(`[P]::GoogleLogin::Result::`, result);
+
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error(`[P]::GoogleLogin::Error::`, error);
+      return res.status(error.statusCode || 500).json({
+        status: 'error',
+        message: error.message || 'Internal server error',
+      });
+    }
+  };
 }
 
 module.exports = new AuthController();

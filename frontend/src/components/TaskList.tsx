@@ -1,7 +1,7 @@
 // src/components/TaskList.tsx
 import React from 'react';
 import { List, ListItem, ListItemText, IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+ 
 import { useTask } from '../contexts/TaskContext';
 
 interface TaskListProps {
@@ -18,16 +18,13 @@ const TaskList: React.FC<TaskListProps> = ({ showActions = true }) => {
           key={task.id}
           secondaryAction={
             showActions && (
-              <IconButton edge="end" onClick={() => removeTask(task.id)}>
-                <DeleteIcon />  
-              </IconButton>
+              <button onClick={() => removeTask(task.id)}>Xóa</button>
             )
           }
         >
-          <ListItemText primary={task.title} /> 
-          <ListItemText primary={task.id + "  1"} />
-        </ListItem>
-      ))}
+          <ListItemText primary={task.title} />
+         </ListItem>
+      ))}  
     </List>
   );
 };

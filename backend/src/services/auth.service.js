@@ -1,5 +1,7 @@
 const userService = require('./user.service');
 const jwtUtil = require('../utils/jwt');
+const jwt = require('jsonwebtoken');
+  
 
 const getUserOrThrow = async (userId) => {
   const user = await userService.findUserById(userId);
@@ -92,6 +94,44 @@ const authService = {
       accessToken,
     };
   },
+  
+  googleLogin: async (credential) => {
+    try {
+      // Giải mã JWT credential từ Google
+      const decoded = jwt.decode(credential);
+      if (!decoded) throw new Error('Invalid Google credential');
+
+      const { email, sub, name } = decoded;
+      
+      // Tìm hoặc tạo user từ thông tin Google
+      let user = await userService.findUserByEmail(email);
+      
+      if (!user) {
+        // Nếu không tìm thấy user, tạo mới với username là email
+        // Tạo password ngẫu nhiên (người dùng sẽ không cần dùng)
+        const randomPassword = Math.random().toString(36).slice(-8);
+        user = await userService.createGoogleUser(email, randomPassword, {
+          googleId: sub,
+          name: name
+        });
+      }
+
+      // Tạo token như thông thường
+      const accessToken = jwtUtil.signToken({ userId: user._id, username: user.username || email });
+      const refreshToken = jwtUtil.signRefreshToken({ userId: user._id, username: user.username || email });
+
+      return {
+        status: 'success',
+        accessToken,
+        refreshToken,
+        username: user.username || email,
+      };
+    } catch (error) {
+      console.error('Google login error:', error);
+      throw error;
+    }
+  },
+
 };
 
 module.exports = authService;

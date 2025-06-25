@@ -34,17 +34,37 @@ export const login = async (username: string, password: string): Promise<AuthRes
     body: JSON.stringify({ username, password })
   });
   const data = await res.json();
-  
+
   if (data.status === 'success') {
     if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
     if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
   }
-  
+
   return data;
 };
 
- 
- 
+export const googleLogin = async (credential: string) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential })
+    });
+
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      // Lưu token vào localStorage
+      if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
+      if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Google login error:', error);
+    return { status: 'error', message: 'Network error' };
+  }
+};
 
 export const changePassword = async (currentPassword: string, newPassword: string): Promise<any> => {
   try {
@@ -62,19 +82,19 @@ export const changePassword = async (currentPassword: string, newPassword: strin
 
 export const refreshToken = async (): Promise<{ accessToken: string }> => {
   const refreshToken = localStorage.getItem('refreshToken');
-  
+
   if (!refreshToken) {
     throw new Error('No refresh token available');
   }
-  
+
   const res = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken })
   });
-  
+
   const data = await res.json();
-  
+
   if (data.status === 'success' && data.accessToken) {
     localStorage.setItem('accessToken', data.accessToken);
     return { accessToken: data.accessToken };

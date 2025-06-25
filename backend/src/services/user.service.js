@@ -21,16 +21,16 @@ exports.comparePassword = (password, hash) => {
 
 exports.updateUserHobbies = async (userId, hobbies) => {
   return User.findByIdAndUpdate(
-    userId, 
-    { hobbies }, 
+    userId,
+    { hobbies },
     { new: true, select: '-password' }
   );
 };
 
 exports.updateUserGender = async (userId, gender) => {
   return User.findByIdAndUpdate(
-    userId, 
-    { gender }, 
+    userId,
+    { gender },
     { new: true, select: '-password' }
   );
 };
@@ -38,8 +38,27 @@ exports.updateUserGender = async (userId, gender) => {
 exports.changePassword = async (userId, newPassword) => {
   const hashedPassword = await bcrypt.hash(newPassword, 10);
   return User.findByIdAndUpdate(
-    userId, 
-    { password: hashedPassword }, 
+    userId,
+    { password: hashedPassword },
     { new: true, select: '-password' }
   );
+};
+
+// Thêm phương thức tìm user theo email
+exports.findUserByEmail = (email) => {
+  return User.findOne({ email });
+};
+
+// Thêm phương thức tạo user từ Google
+exports.createGoogleUser = async (email, password, googleInfo) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = new User({
+    username: email, // Sử dụng email làm username
+    email,
+    password: hashedPassword,
+    googleId: googleInfo.googleId,
+    name: googleInfo.name,
+    isGoogleUser: true
+  });
+  return user.save();
 };

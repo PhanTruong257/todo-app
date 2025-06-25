@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
-import { register, login } from '../services/auth';
+import { Box, TextField, Button, Typography, Divider } from '@mui/material';
+import { register, login,googleLogin } from '../services/auth';
+import { GoogleLogin } from '@react-oauth/google';
 
 interface LoginFormProps {
   onLogin: (username: string, token: string) => void;
@@ -29,7 +30,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           setIsRegister(false);
         } else {
           setError(res.message || 'Đăng ký thất bại!');
-        }      } else {
+        }
+      } else {
         const res = await login(username, password);
         if (res.status === 'success' && res.accessToken) {
           onLogin(username, res.accessToken);
@@ -39,6 +41,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       }
     } catch (err) {
       setError('Có lỗi xảy ra!');
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      console.log('Google credential:', credentialResponse);
+      // Gọi API backend để xác thực token Google
+      const res = await googleLogin(credentialResponse.credential);
+      if (res.status === 'success' && res.accessToken) {
+        // Sử dụng email hoặc username từ response
+        onLogin(res.username || 'Google User', res.accessToken);
+      } else {
+        setError(res.message || 'Đăng nhập Google thất bại!');
+      }
+    } catch (err) {
+      console.error('Google login error:', err);
+      setError('Đăng nhập Google thất bại!');
     }
   };
 
@@ -64,9 +83,30 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       />
       {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
       {success && <Typography color="success.main" sx={{ mt: 1 }}>{success}</Typography>}
-      <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+      <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} >
         {isRegister ? 'Đăng ký' : 'Đăng nhập'}
       </Button>
+
+      <Divider sx={{ my: 2 }}>
+        <Typography variant="body2" color="text.secondary">
+          Hoặc
+        </Typography>
+      </Divider>
+
+      {/* Nút đăng nhập Google tùy chỉnh */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+        
+          onError={() => setError('Đăng nhập Google thất bại!')}
+          theme="filled_blue"
+          text="signin_with"
+          shape="rectangular"
+          locale="vi"
+          useOneTap
+        />
+      </Box>
+
       <Button
         variant="text"
         color="secondary"
