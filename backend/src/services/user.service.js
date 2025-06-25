@@ -1,14 +1,18 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-exports.createUser = async (username, password) => {
+exports.createUser = async (email, password, name) => {
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ username, password: hashedPassword });
+  const user = new User({
+    email,
+    password: hashedPassword,
+    name: name || email.split('@')[0] // Sử dụng phần trước @ làm tên mặc định nếu không có tên
+  });
   return user.save();
 };
 
-exports.findUserByUsername = (username) => {
-  return User.findOne({ username });
+exports.findUserByEmail = (email) => {
+  return User.findOne({ email });
 };
 
 exports.findUserById = (userId) => {
@@ -44,16 +48,10 @@ exports.changePassword = async (userId, newPassword) => {
   );
 };
 
-// Thêm phương thức tìm user theo email
-exports.findUserByEmail = (email) => {
-  return User.findOne({ email });
-};
-
 // Thêm phương thức tạo user từ Google
 exports.createGoogleUser = async (email, password, googleInfo) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = new User({
-    username: email, // Sử dụng email làm username
     email,
     password: hashedPassword,
     googleId: googleInfo.googleId,
@@ -61,4 +59,47 @@ exports.createGoogleUser = async (email, password, googleInfo) => {
     isGoogleUser: true
   });
   return user.save();
+};
+
+// Đặt token đặt lại mật khẩu
+exports.setPasswordResetToken = async (email) => {
+  // Tạo token ngẫu nhiên
+  const token = require('crypto').randomBytes(32).toString('hex');
+  // Thời gian hết hạn: 15 phút
+  const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+  return User.findOneAndUpdate(
+    { email },
+    {
+      resetPasswordToken: token,
+      resetPasswordExpires: expires
+    },
+    { new: true }
+  );
+};
+
+// Tìm người dùng bằng token đặt lại mật khẩu
+exports.findUserByResetToken = (token) => {
+  return User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: Date.now() }
+  });
+};
+
+// Đặt lại mật khẩu và xóa token
+exports.resetPassword = async (token, newPassword) => {
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  return User.findOneAndUpdate(
+    {
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    },
+    {
+      password: hashedPassword,
+      resetPasswordToken: undefined,
+      resetPasswordExpires: undefined
+    },
+    { new: true, select: '-password' }
+  );
 };

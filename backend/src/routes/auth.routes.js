@@ -7,7 +7,10 @@ const authMiddleware = require('../middleware/auth.middleware');
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/refresh-token', authController.refreshToken);
-router.post('/google', authController.googleLogin); // Thêm route mới
+router.post('/google', authController.googleLogin); // Route đăng nhập bằng Google
+router.post('/forgot-password', authController.forgotPassword); // Route quên mật khẩu
+router.post('/verify-reset-token', authController.verifyResetToken); // Route kiểm tra token
+router.post('/reset-password', authController.resetPassword); // Route đặt lại mật khẩu
 
 // Protected routes
 router.post('/update-hobbies', authMiddleware, authController.updateUserHobbies);

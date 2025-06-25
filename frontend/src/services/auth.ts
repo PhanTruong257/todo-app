@@ -2,7 +2,7 @@ export interface AuthResponse {
   status: string;
   accessToken?: string;
   refreshToken?: string;
-  username?: string;
+  email?: string;
   message?: string;
 }
 
@@ -18,20 +18,20 @@ const getAuthHeader = () => {
   };
 };
 
-export const register = async (username: string, password: string): Promise<AuthResponse> => {
+export const register = async (email: string, password: string): Promise<AuthResponse> => {
   const res = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({ email, password })
   });
   return res.json();
 };
 
-export const login = async (username: string, password: string): Promise<AuthResponse> => {
+export const login = async (email: string, password: string): Promise<AuthResponse> => {
   const res = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({ email, password })
   });
   const data = await res.json();
 
@@ -100,5 +100,60 @@ export const refreshToken = async (): Promise<{ accessToken: string }> => {
     return { accessToken: data.accessToken };
   } else {
     throw new Error(data.message || 'Failed to refresh token');
+  }
+};
+
+export const forgotPassword = async (email: string): Promise<AuthResponse> => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('Server error:', errorData);
+      return {
+        status: 'error',
+        message: errorData.message || `Lỗi máy chủ: ${res.status}`
+      };
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    return {
+      status: 'error',
+      message: `Lỗi kết nối: ${error instanceof Error ? error.message : 'Network error'}`
+    };
+  }
+};
+
+export const verifyResetToken = async (token: string): Promise<AuthResponse> => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/verify-reset-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    });
+    return res.json();
+  } catch (error) {
+    console.error('Verify token error:', error);
+    return { status: 'error', message: 'Network error' };
+  }
+};
+
+export const resetPassword = async (token: string, newPassword: string): Promise<AuthResponse> => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, newPassword })
+    });
+    return res.json();
+  } catch (error) {
+    console.error('Reset password error:', error);
+    return { status: 'error', message: 'Network error' };
   }
 };
