@@ -90,6 +90,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             <Box sx={{ mt: 1, textAlign: 'right' }}>
               <Link
                 component="button"
+                 type="button"
                 variant="body2"
                 onClick={(e) => {
                   e.preventDefault();
