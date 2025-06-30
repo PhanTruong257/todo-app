@@ -4,8 +4,8 @@ import { Box, Typography, Button, AppBar, Toolbar, Chip } from '@mui/material';
 import TodoForm from './TodoForm';
 import TaskList from './TaskList';
 import LoginForm from './LoginForm';
-import { useAuth } from '../contexts/AuthContext';
-import { useTask } from '../contexts/TaskContext';
+ import { useAuth } from '../hooks/useAuth';
+import { useTask } from '../hooks/useTask';
 
 const Dashboard: React.FC = () => {
   const { user, login, logout, isAuthenticated } = useAuth();

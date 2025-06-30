@@ -1,8 +1,8 @@
 // src/contexts/TaskContext.tsx
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { Task } from '../types/task';
 import { fetchTasks, addTask, deleteTask } from '../services/task';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 interface TaskContextType {
   tasks: Task[];
@@ -10,7 +10,7 @@ interface TaskContextType {
   removeTask: (id: string) => void;
 }
 
-const TaskContext = createContext<TaskContextType | undefined>(undefined);
+export const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -57,12 +57,4 @@ export const TaskProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       {children}
     </TaskContext.Provider>
   );
-};
-
-export const useTask = () => {
-  const context = useContext(TaskContext);
-  if (context === undefined) {
-    throw new Error('useTask must be used within a TaskProvider');
-  }
-  return context;
 };
