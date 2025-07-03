@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Divider, Link } from '@mui/material';
+import { Box, TextField, Button, Typography, Divider, Link,InputAdornment, IconButton  } from '@mui/material';
 import { register, login, googleLogin } from '../services/auth';
 import { GoogleLogin } from '@react-oauth/google';
 import ForgotPasswordForm from './ForgotPasswordForm';
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 interface LoginFormProps {
   onLogin: (email: string, token: string) => void;
@@ -15,6 +16,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   const [success, setSuccess] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -80,17 +83,29 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           <TextField
             fullWidth
             label="Mật khẩu"
-            type="password"
+            type={showPassword ? "text" : "password"} // 👈 Toggle this
             value={password}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
             margin="normal"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
           {!isRegister && (
             <Box sx={{ mt: 1, textAlign: 'right' }}>
               <Link
                 component="button"
-                 type="button"
+                type="button"
                 variant="body2"
                 onClick={(e) => {
                   e.preventDefault();
