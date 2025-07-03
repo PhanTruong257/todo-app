@@ -1,26 +1,70 @@
 // src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Box } from '@mui/material';
-import Dashboard from './components/Dashboard';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './contexts/AuthContext';
 import { TaskProvider } from './contexts/TaskContext';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import Dashboard from './components/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import AuthRedirect from './components/AuthRedirect';
 import ResetPasswordForm from './components/ResetPasswordForm';
-import ForgotPasswordForm from './components/ForgotPasswordForm';
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <AuthProvider>
-        <TaskProvider>
-          <Routes>
-            <Route path="/reset-password" element={<ResetPasswordForm />} />
-            <Route path="/forgot-password" element={<Box sx={{ p: 2 }}><ForgotPasswordForm onBack={() => window.location.href = '/'} /></Box>} />
-            <Route path="/*" element={<Dashboard />} />
-          </Routes>
-        </TaskProvider>
-      </AuthProvider>
-    </Router>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ''}>
+      <Router>
+        <AuthProvider>
+          <TaskProvider>
+            <Routes>
+              {/* Public routes - redirect to dashboard if already authenticated */}
+              <Route
+                path="/login"
+                element={
+                  <AuthRedirect>
+                    <LoginPage />
+                  </AuthRedirect>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <AuthRedirect>
+                    <RegisterPage />
+                  </AuthRedirect>
+                }
+              />
+              <Route
+                path="/forgot-password"
+                element={
+                  <AuthRedirect>
+                    <ForgotPasswordPage />
+                  </AuthRedirect>
+                }
+              />
+              <Route path="/reset-password" element={<ResetPasswordForm />} />
+
+               <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Redirect root to dashboard */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+              {/* Catch all route - redirect to dashboard */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </TaskProvider>
+        </AuthProvider>
+      </Router>
+    </GoogleOAuthProvider>
   );
 };
 
